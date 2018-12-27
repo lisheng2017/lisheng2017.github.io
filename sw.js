@@ -14,22 +14,48 @@
 // })
 
 // fetch 事件
-this.addEventListener('fetch', event => {
-  event.respondWith( // 拦截 HTTP 相应
-    caches.match(event.request).then(response => {
-      // 如果 Service Worker 有自己的返回，就直接返回，减少一次 http 请求
-      if (response) return response
-      // 否则请求服务端
-      const request = event.request.clone() // 拷贝原始请求
-      return fetch(request).then(httpRes => {
-        // 请求失败，直接返回结果
-        if (!httpRes || httpRes.status !== 200) return httpRes
-        // 请求成功，缓存请求
-        const responseClone = httpRes.clone()
-        caches.open('test-cache-v1').then(cache => {
-          cache.put(event.request, responseClone) // 下次相同请求就不需要到服务端要结果了
-        })
+// this.addEventListener('fetch', event => {
+//   event.respondWith( // 拦截 HTTP 相应
+//     caches.match(event.request).then(response => {
+//       // 如果 Service Worker 有自己的返回，就直接返回，减少一次 http 请求
+//       if (response) return response
+//       // 否则请求服务端
+//       const request = event.request.clone() // 拷贝原始请求
+//       return fetch(request).then(httpRes => {
+//         // 请求失败，直接返回结果
+//         if (!httpRes || httpRes.status !== 200) return httpRes
+//         // 请求成功，缓存请求
+//         const responseClone = httpRes.clone()
+//         caches.open('test-cache-v1').then(cache => {
+//           cache.put(event.request, responseClone) // 下次相同请求就不需要到服务端要结果了
+//         })
+//       })
+//     })
+//   )
+// })
+
+// 安装阶段跳过等待，直接进入 active
+this.addEventListener('install', event => {
+  event.waitUntil(this.skipWaiting());
+})
+
+this.addEventListener('activate', event => {
+  event.waitUntil(
+    Promise.all([
+
+      // 更新客户端
+      this.clients.claim(),
+
+      // 清理旧版本
+      caches.keys().then(cacheList => {
+        return Promise.all(
+          cacheList.map(cacheName => {
+            if (cacheName !== 'test-cache-v1') {
+              return caches.delete(cacheName)
+            }
+          })
+        )
       })
-    })
+    ])
   )
 })
