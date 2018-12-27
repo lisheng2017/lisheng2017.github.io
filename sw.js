@@ -35,6 +35,7 @@
 // })
 
 // 安装阶段跳过等待，直接进入 active
+console.log(self, this)
 this.addEventListener('install', event => {
   event.waitUntil(this.skipWaiting());
 })
@@ -50,7 +51,7 @@ this.addEventListener('activate', event => {
       caches.keys().then(cacheList => {
         return Promise.all(
           cacheList.map(cacheName => {
-            if (cacheName !== 'test-cache-v1') {
+            if (cacheName !== 'test-cache-v2') {
               return caches.delete(cacheName)
             }
           })
