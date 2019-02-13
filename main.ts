@@ -1,12 +1,13 @@
 if ('serviceWorker' in navigator) { // 分辨浏览器是否支持
-    window.addEventListener('load', function () {
-        navigator.serviceWorker.register('/sw.js', { scope: '/' }) // 在 sw.js 注册 sw, 
-            .then(function (registration) {
-            console.log('service worker registration successful with scope: ', registration.scope);
-        })["catch"](function (err) {
-            console.log('service worker registration failed: ', err);
-        });
-    });
+  window.addEventListener('load', () => { // onload 调用
+    navigator.serviceWorker.register('/sw.js', {scope: '/'}) // 在 sw.js 注册 sw, 
+      .then(registration => {
+        console.log('service worker registration successful with scope: ', registration.scope)
+      })
+      .catch(err => {
+        console.log('service worker registration failed: ', err)
+      })
+  })
 }
 // 关于 register 方法的 scope 参数，需要说明一下：
 // Service Worker 线程将接收 scope 指定网域目录上所有事项的 fetch 事件，
